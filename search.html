@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск расписания - РАНХиГС</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Поиск расписания</h1>
+            <p>Колледж РАНХиГС</p>
+        </header>
+
+        <nav class="breadcrumbs">
+            <a href="index.html">Главная</a> > 
+            <span>Поиск</span>
+        </nav>
+
+        <div class="search-form">
+            <h2>Найти расписание</h2>
+            
+            <div class="form-group">
+                <label for="group">Группа:</label>
+                <select id="group">
+                    <option value="">Выберите группу</option>
+                    <option value="К-101">К-101</option>
+                    <option value="К-102">К-102</option>
+                    <option value="К-103">К-103</option>
+                    <!-- Добавьте остальные 12 групп -->
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="teacher">Преподаватель:</label>
+                <input type="text" id="teacher" placeholder="Начните вводить фамилию...">
+            </div>
+
+            <div class="form-group">
+                <label for="classroom">Аудитория:</label>
+                <input type="text" id="classroom" placeholder="Номер аудитории...">
+            </div>
+
+            <button onclick="searchSchedule()" class="btn btn-primary">Найти</button>
+            <button onclick="clearSearch()" class="btn btn-secondary">Сбросить</button>
+        </div>
+
+        <div id="results" class="search-results">
+            <!-- Результаты поиска появятся здесь -->
+        </div>
+
+        <footer>
+            <a href="index.html" class="btn btn-secondary">Вернуться на главную</a>
+            <p>© 2024 Расписание занятий колледжа РАНХиГС</p>
+        </footer>
+    </div>
+
+    <script src="data/schedule.js"></script>
+    <script>
+        function searchSchedule() {
+            const group = document.getElementById('group').value;
+            const teacher = document.getElementById('teacher').value.toLowerCase();
+            const classroom = document.getElementById('classroom').value;
+            
+            let results = [];
+            
+            // Поиск в данных из schedule.js
+            scheduleData.forEach(week => {
+                week.days.forEach(day => {
+                    if (day.lessons) {
+                        day.lessons.forEach(lesson => {
+                            let match = true;
+                            
+                            if (group && lesson.group !== group) match = false;
+                            if (teacher && !lesson.teacher.toLowerCase().includes(teacher)) match = false;
+                            if (classroom && !lesson.classroom.includes(classroom)) match = false;
+                            
+                            if (match) {
+                                results.push({
+                                    week: week.week,
+                                    date: day.date,
+                                    lesson: lesson
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+            
+            displayResults(results);
+        }
+        
+        function displayResults(results) {
+            const container = document.getElementById('results');
+            
+            if (results.length === 0) {
+                container.innerHTML = '<div class="result-card">Ничего не найдено</div>';
+                return;
+            }
+            
+            let html = `<h3>Найдено записей: ${results.length}</h3>`;
+            
+            results.forEach(result => {
+                html += `
+                    <div class="result-card">
+                        <strong>${result.date}</strong> (${result.week})<br>
+                        Группа: ${result.lesson.group}<br>
+                        Предмет: ${result.lesson.subject}<br>
+                        Преподаватель: ${result.lesson.teacher}<br>
+                        Аудитория: ${result.lesson.classroom}<br>
+                        Время: ${result.lesson.time}
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+        }
+        
+        function clearSearch() {
+            document.getElementById('group').value = '';
+            document.getElementById('teacher').value = '';
+            document.getElementById('classroom').value = '';
+            document.getElementById('results').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
